@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Jokenpô - Pedra, Papel e Tesoura</title>
+
+  <!-- Estilos (CSS) -->
+  <style>
+  * {
+    font-family: Helvetica Neue, Helvetica, Arial;
+    font-weight: 400;
+    cursor: default;
+  }
+
+  body {
+    background-color: #fff;
+  }
+
+  #titulo {
+    font-size: 40px;
+    color: #999999;
+    text-align: center;
+  }
+
+  #placar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #player, #computador {
+    position: relative;
+    flex-grow: 1;
+    border-radius: 5px;
+    width: 500px;
+    padding: 90px;
+    color: #f8f8f8;
+  }
+  #player {
+    background-color: #780000;
+  }
+  #computador {
+    background-color: #505050;
+  }
+  #versus {
+    width: 200px;
+    text-align: center;
+    font-size: 72px;
+    font-weight: 300;
+  }
+
+  #player-nome, #computador-nome {
+    margin: 50;
+    padding: 50;
+  }
+  #player-nome {
+    text-align: left;
+  }
+  #computador-nome {
+    text-align: right;
+  }
+
+  #player-pontos, #computador-pontos {
+    position: absolute;
+    top: 5px;
+    font-size: 72px;
+  }
+  #player-pontos {
+    right: 20px;
+  }
+  #computador-pontos {
+    left: 20px;
+  }
+
+  #player-escolha, #computador-escolha {
+    list-style: none;
+    text-align: center;
+    margin: 30px 0 0;
+    padding: 0;
+  }
+  #player-escolha li, #computador-escolha li {
+    display: inline;
+    padding: 0 15px;
+  }
+  #player-escolha a, #computador-escolha a {
+    opacity: .2;
+    padding: 5px;
+  }
+  #player-escolha a:hover, #player-escolha a.selecionado, #computador-escolha a.selecionado {
+    opacity: 1;
+  }
+  #player-escolha img, #computador-escolha img {
+    max-width: 80px;
+  }
+
+  #mensagem {
+    border-radius: 10px;
+    background-color: #7f8fa6;
+    font-size: 25px;
+    color: #fff;
+    text-align: center;
+    font-weight: 400;
+    margin-top: 60px;
+    padding:60px;
+  }
+  </style>
+</head>
+<body>
+  <div id="principal">
+    <h1 id="titulo">Pedra, Papel e Tesoura</h1>
+
+    <div id="placar">
+      <div id="player">
+        <h2 id="player-nome">&nbsp;</h2>
+        <span id="player-pontos">0</span>
+        <ul id="player-escolha">
+          <li><a id="player-escolha-1"><img src="img/pedra.png"></a></li>
+          <li><a id="player-escolha-2"><img src="img/papel.png"></a></li>
+          <li><a id="player-escolha-3"><img src="img/tesoura.png"></a></li>
+        </ul>
+      </div>
+
+      <div id="versus">vs</div>
+
+      <div id="computador">
+        <h2 id="computador-nome">Computador</h2>
+        <span id="computador-pontos">0</span>
+
+        <ul id="computador-escolha">
+          <li><a id="computador-escolha-1"><img src="img/pedra.png"></a></li>
+          <li><a id="computador-escolha-2"><img src="img/papel.png"></a></li>
+          <li><a id="computador-escolha-3"><img src="img/tesoura.png"></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="mensagem">Opa, seja bem vindo... Clique em uma opção apra jogar</div>
+  </div>
+
+  <!--Código JavaScript do jogo -->
+  <script>
+    var playerNome;
+    var playerPontos = 0;
+    var playerEscolha = 0;
+
+    var computadorEscolha = 0;
+    var computadorPontos = 0;
+
+    // Gera números randomicos.
+    // 1 - Pedra
+    // 2 - Papel
+    // 3 - Tesoura
+    function sortear(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Traduz o número em frase.
+    // 1 - Pedra
+    // 2 - Papel
+    // 3 - Tesoura
+    function traduzirEscolha(numero) {
+      if(numero == 1) {
+        return 'Pedra';
+      }
+      else if(numero == 2) {
+        return 'Papel';
+      }
+      else if(numero == 3) {
+        return 'Tesoura';
+      }
+    }
+
+    // classe selecionado.
+    function selecionar(tipo, escolha) {
+      document.getElementById(tipo + '-escolha-' + escolha).classList.add('selecionado');
+    }
+
+    // Remove a classe selecionado.
+    function deselecionar(tipo, escolha) {
+      document.getElementById(tipo + '-escolha-' + escolha).classList.remove('selecionado');
+    }
+
+    // mensagem na tela.
+    function mensagem(texto){
+      document.getElementById('mensagem').innerHTML = texto;
+    }
+
+    // nome do jogador.
+    function definirplayerNome(nome) {
+      document.getElementById('player-nome').innerHTML = nome;
+    }
+
+    // Calcula e retorna quem ganhou.
+    // 0 - Empate
+    // 1 - Jogador
+    // 2 - Computador
+    function calcularEscolha(player, computador) {
+      if (player == 1 && computador == 1) {
+        return 0;
+      }
+      else if (player == 1 && computador == 2) {
+        return 2;
+      }
+      else if (player == 1 && computador == 3) {
+        return 1;
+      }
+      else if (player == 2 && computador == 1) {
+        return 1;
+      }
+      else if (player == 2 && computador == 2) {
+        return 0;
+      }
+      else if (player == 2 && computador == 3) {
+        return 2;
+      }
+      else if (player == 3 && computador == 1) {
+        return 2;
+      }
+      else if (player == 3 && computador == 2) {
+        return 1;
+      }
+      else if (player == 3 && computador == 3) {
+        return 0;
+      }
+    }
+
+    // Soma os pontos do jogador
+    function somarPontoplayer() {
+      playerPontos++;
+      document.getElementById('player-pontos').innerHTML = playerPontos;
+    }
+
+    // Soma os pontos do computador
+    function somarPontoComputador() {
+      computadorPontos++;
+      document.getElementById('computador-pontos').innerHTML = computadorPontos;
+    }
+
+    // Função de jogar
+    function jogar(escolha) {
+      playerEscolha = escolha;
+      selecionar('player', playerEscolha);
+
+      computadorEscolha = sortear(1, 3);
+      selecionar('computador', computadorEscolha);
+
+      var ganhador = calcularEscolha(playerEscolha, computadorEscolha);
+
+      if (ganhador == 0) {
+        mensagem('Empate');
+      }
+      else if (ganhador == 1) {
+        mensagem('Ponto para ' + playerNome);
+        somarPontoplayer();
+      }
+      else if (ganhador == 2) {
+        mensagem('Ponto para Computador');
+        somarPontoComputador();
+      }
+
+      setTimeout(function() {
+        deselecionar('player', playerEscolha);
+        deselecionar('computador', computadorEscolha);
+        mensagem(playerNome + ' escolha uma opção...');
+      }, 3500);
+    }
+
+    document.getElementById('player-escolha-1').onclick = function(){ jogar(1); };
+    document.getElementById('player-escolha-2').onclick = function(){ jogar(2); };
+    document.getElementById('player-escolha-3').onclick = function(){ jogar(3); };
+
+    playerNome = prompt("Qual é o seu nome?");
+    definirJogadorNome(playerNome);
+
+  </script>
+</body>
+</html>
